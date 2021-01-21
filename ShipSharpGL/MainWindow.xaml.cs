@@ -7,18 +7,31 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Reflection;
 using SharpGL.SceneGraph;
+using System.Runtime.InteropServices;
 
 namespace ShipSharpGL
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
+
     public partial class MainWindow : Window
     {
+        [DllImport("User32.dll")]
+        private static extern bool SetCursorPos(int X, int Y);
+        private const int BORDER = 100;
+        private Point oldPos;
+
+        public int Red { get; set; }
+        public int Green { get; set; }
+        public int Blue { get; set; }
+
         World world = null;
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = this;
             try
             {
                 world = new World(
@@ -56,6 +69,7 @@ namespace ShipSharpGL
         /// <param name="args">The <see cref="SharpGL.SceneGraph.OpenGLEventArgs"/> instance containing the event data.</param>
         private void openGLControl_OpenGLInitialized(object sender, OpenGLRoutedEventArgs args)
         {
+            SetCursorPos((int)(Left + Width / 2), (int)(Top + Height / 2));
             OpenGL gl = openGLControl.OpenGL;
             world.Initialize(gl);
         }
@@ -75,16 +89,81 @@ namespace ShipSharpGL
         {
             switch (e.Key)
             {
-                case Key.F10: Close(); break;
-                case Key.W: world.RotationX -= 5.0f; break;
-                case Key.S: world.RotationX += 5.0f; break;
-                case Key.A: world.RotationY -= 5.0f; break;
-                case Key.D: world.RotationY += 5.0f; break;
-                case Key.E: world.TranslateX -= 100.0f; break;
-                case Key.Q: world.TranslateX += 100.0f; break;
-                case Key.Z: world.TranslateZ += 100.0f; break;
-                case Key.X: world.TranslateZ -= 100.0f; break;
+                case Key.W: world.UpdateCameraRotation(0, 0.09f); break;
+                case Key.S: world.UpdateCameraRotation(0, -0.09f); break;
+                case Key.A: world.UpdateCameraRotation(0.09f, 0); break;
+                case Key.D: world.UpdateCameraRotation(-0.09f, 0); break;
+                case Key.Add: world.UpdateCameraPosition(0, 0, 10); break;
+                case Key.Subtract: world.UpdateCameraPosition(0, 0, -10); break;
             }
+        }
+
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            bool outOfBoundsX = false;
+            bool outOfBoundsY = false;
+            Point point = e.GetPosition(this);
+            if (point.Y <= BORDER || point.Y >= this.Height - BORDER)
+            {
+                outOfBoundsY = true;
+            }
+            if (point.X <= BORDER || point.X >= this.Width - BORDER)
+            {
+                outOfBoundsX = true;
+            }
+
+            if (!outOfBoundsY && !outOfBoundsX)
+            {
+                double deltaX = oldPos.X - point.X;
+                double deltaY = oldPos.Y - point.Y;
+                world.UpdateCameraRotation(deltaX, deltaY);
+                oldPos = point;
+            }
+            else
+            {
+                if (outOfBoundsX)
+                {
+                    SetCursorPos((int)Left + (int)Width / 2, (int)Top + (int)point.Y);
+                    oldPos.X = Width / 2;
+                    oldPos.Y = point.Y;
+                }
+                else
+                {
+                    SetCursorPos((int)this.Left + (int)point.X, (int)this.Top + (int)this.Height / 2);
+                    oldPos.Y = this.Height / 2;
+                    oldPos.X = point.X;
+                }
+            }
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            world.PostPercentage = (float)e.NewValue;
+        }
+
+        private void Slider_ValueChanged_1(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            world.RampPercentage = (float)e.NewValue;
+        }
+
+        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            float.TryParse(RedText.Text, out float red);
+            Console.WriteLine(red);
+            world.Red = red;
+
+        }
+
+        private void TextBox_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            float.TryParse(GreenText.Text, out float green);
+            world.Green = green;
+        }
+
+        private void TextBox_TextChanged_2(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            float.TryParse(BlueText.Text, out float blue);
+            world.Blue = blue;
         }
     }
 }

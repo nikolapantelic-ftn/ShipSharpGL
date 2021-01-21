@@ -7,10 +7,39 @@
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF" KeyDown="Window_KeyDown"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <sharpGL:OpenGLControl
-                Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
-                OpenGLInitialized="openGLControl_OpenGLInitialized"  Resized="openGLControl_Resized"
-                DrawFPS="True" RenderContextType="FBO" FrameRate="200"/>
-    </Grid>
+    <DockPanel>
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar Height="32" Margin="0,0,-106,0">
+                <Label>
+                    Mol :
+                </Label>
+                <Slider Minimum="0" Maximum="100" ValueChanged="Slider_ValueChanged_1"  Width="131"/>
+                <Label>
+                    Reflektor :
+                </Label>
+                <Label>
+                    R:
+                </Label>
+                <TextBox x:Name="RedText"  Height="26" Margin="0" TextWrapping="Wrap" Text="{Binding Red}" VerticalAlignment="Top" Width="40" TextChanged="TextBox_TextChanged"/>
+                <Label>
+                    G:
+                </Label>
+                <TextBox x:Name="GreenText" Height="26" Margin="0" TextWrapping="Wrap" Text="{Binding Green}" VerticalAlignment="Top" Width="40" TextChanged="TextBox_TextChanged_1"/>
+                <Label>
+                    B:
+                </Label>
+                <TextBox x:Name="BlueText" Height="26" Margin="0" TextWrapping="Wrap" Text="{Binding Blue}" VerticalAlignment="Top" Width="40" TextChanged="TextBox_TextChanged_2"/>
+                <Label>
+                    Stubovi :
+                </Label>
+                <Slider Minimum="0" Maximum="100" ValueChanged="Slider_ValueChanged" Width="131"/>
+            </ToolBar>
+        </ToolBarTray>
+        <!-- The OpenGL control provides a OpenGL drawing surface. -->
+        <sharpGL:OpenGLControl 
+            Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
+            OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
+            DrawFPS="True" RenderContextType="FBO" FrameRate="200"/>
+
+    </DockPanel>
 </Window>

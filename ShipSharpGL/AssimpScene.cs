@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using SharpGL.SceneGraph;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace ShipSharpGL
 {
@@ -43,8 +45,19 @@ namespace ShipSharpGL
             string textureFilePath = Path.Combine(sceneFilePath, "boat_body_diffuse.jpg");
             mat.TextureDiffuse = new TextureSlot(textureFilePath, TextureType.Diffuse, 0, TextureMapping.FromUV, 0, 0f, TextureOperation.SmoothAdd, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0);
             Scene.Materials.Add(mat);
+            Bitmap image = new Bitmap(textureFilePath);
+            Scene.Textures.Add(new EmbeddedTexture("jpg", ImageToByteArray(image)));
             Console.WriteLine(Scene.HasMaterials);
             context.Dispose();
+        }
+
+        public byte[] ImageToByteArray(System.Drawing.Image imageIn)
+        {
+            using (var ms = new MemoryStream())
+            {
+                imageIn.Save(ms, imageIn.RawFormat);
+                return ms.ToArray();
+            }
         }
 
         public void Initialize()
