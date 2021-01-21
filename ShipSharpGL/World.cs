@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Reflection;
+using System.Windows.Threading;
 using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.SceneGraph.Assets;
@@ -35,6 +36,17 @@ namespace ShipSharpGL
         public float Green { get; set; }
         public float Blue { get; set; }
 
+        private const float startBoatX = 1500;
+        private const float startBoatZ = 500;
+        private const float startBoatY = 0;
+        private const float finalBoatX = 0;
+        private const float finalBoatZ = 0;
+        private const float finalBoatY = -1000;
+
+        public float BoatX { get; set; } = startBoatX;
+        public float BoatZ { get; set; } = startBoatZ;
+        public float BoatY { get; set; } = startBoatY;
+
         private Vertex position;
         private Vertex target;
         private Vertex upVector;
@@ -49,6 +61,8 @@ namespace ShipSharpGL
         private Vertex right;
         private Vertex up;
 
+        private DispatcherTimer timer;
+        private DispatcherTimer timer2;
 
 
         private enum TextureObjects { Wood = 0, Metal, Water, Boat }
@@ -309,10 +323,12 @@ namespace ShipSharpGL
 
             gl.Scale(0.1, 0.1, 0.1);
             gl.PushMatrix();
-            gl.Rotate(-90, 0, 0);
+            gl.Translate(BoatX, BoatY, -BoatZ);
+            gl.Rotate(-90 - RotationX, 0, 0);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_ADD);
             Scene.Draw();
+
             gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
             gl.PopMatrix();
             
@@ -338,10 +354,70 @@ namespace ShipSharpGL
             gl.Enable(OpenGL.GL_CULL_FACE);
             SetupLighting(gl);
             SetupCamera(gl);
+            SetupTimers();
             Scene.LoadScene();
             Scene.Initialize();
 
 
+        }
+
+        public void ResetAnimation()
+        {
+            timer2.Stop();
+            BoatX = startBoatX;
+            BoatY = startBoatY;
+            BoatZ = startBoatZ;
+            RotationX = 0;
+            timer.Start();
+        }
+
+        private void SetupTimers()
+        {
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(20);
+            timer.Tick += new EventHandler(UpdateAnimation);
+            timer.Start();
+            timer2 = new DispatcherTimer();
+            timer2.Interval = TimeSpan.FromMilliseconds(20);
+            timer2.Tick += new EventHandler(SinkingAnimation);
+        }
+
+        private void UpdateAnimation(object sender, EventArgs e)
+        {
+            if (BoatX > finalBoatX)
+            {
+                BoatX -= 5;
+            }
+            if (BoatZ > finalBoatZ)
+            {
+                BoatZ -= 3;
+            }
+            if (BoatZ <= finalBoatZ && BoatX <= finalBoatX)
+            {
+                if (RampPercentage < 100)
+                {
+                    RampPercentage += 5;
+                } 
+                else
+                {
+                    timer.Stop();
+                    timer2.Start();
+                }
+            }
+
+                
+        }
+        private void SinkingAnimation(object sender, EventArgs e)
+        {
+            RotationX += 0.8f;
+            if (RotationX > 40)
+            {
+                BoatY -= 4;
+                if (BoatY < finalBoatY)
+                {
+                    timer2.Stop();
+                }
+            }
         }
 
         private void SetupCamera(OpenGL gl)

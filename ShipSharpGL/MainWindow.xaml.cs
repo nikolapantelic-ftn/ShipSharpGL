@@ -95,6 +95,7 @@ namespace ShipSharpGL
                 case Key.D: world.UpdateCameraRotation(-0.09f, 0); break;
                 case Key.Add: world.UpdateCameraPosition(0, 0, 10); break;
                 case Key.Subtract: world.UpdateCameraPosition(0, 0, -10); break;
+                case Key.C: world.ResetAnimation(); break;
             }
         }
 
@@ -149,9 +150,7 @@ namespace ShipSharpGL
         private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             float.TryParse(RedText.Text, out float red);
-            Console.WriteLine(red);
             world.Red = red;
-
         }
 
         private void TextBox_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
