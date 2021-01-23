@@ -134,7 +134,7 @@ namespace ShipSharpGL
             gl.PushMatrix();
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, textures[(int)TextureObjects.Wood]);
             Cube dock = new Cube();
-            dock.DrawNormals = true;
+            //dock.DrawNormals = true;
             gl.Translate(420, 240, 800);
             DockLight(gl);
             gl.Scale(100, 5, 400);
