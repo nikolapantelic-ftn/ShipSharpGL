@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using SharpGL;
 using SharpGL.SceneGraph;
@@ -41,7 +42,7 @@ namespace ShipSharpGL
         private const float startBoatY = 0;
         private const float finalBoatX = 0;
         private const float finalBoatZ = 0;
-        private const float finalBoatY = -1000;
+        private const float finalBoatY = -200;
 
         public float BoatX { get; set; } = startBoatX;
         public float BoatZ { get; set; } = startBoatZ;
@@ -61,8 +62,8 @@ namespace ShipSharpGL
         private Vertex right;
         private Vertex up;
 
-        private DispatcherTimer timer;
-        private DispatcherTimer timer2;
+        public DispatcherTimer timer;
+        public DispatcherTimer timer2;
 
 
         private enum TextureObjects { Wood = 0, Metal, Water, Boat }
@@ -133,10 +134,21 @@ namespace ShipSharpGL
             gl.PushMatrix();
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, textures[(int)TextureObjects.Wood]);
             Cube dock = new Cube();
+            dock.DrawNormals = true;
             gl.Translate(420, 240, 800);
-
             DockLight(gl);
             gl.Scale(100, 5, 400);
+            /*dock.Material = new Material();
+            dock.Material.Texture = new Texture();
+            dock.Material.Texture.Create(gl, System.IO.Path.Combine(
+                        System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wood.jpg"));
+            dock.Material.Specular = Color.Brown;
+            dock.Material.Diffuse = Color.Brown;
+            dock.Material.Ambient = Color.Brown;
+            dock.Material.Shininess = 100;
+            dock.Normals.Add(new Vertex(0, 1, 0));
+            dock.Normals.Add(new Vertex(0, -1, 0));
+            dock.Material.Bind(gl);*/
             dock.Render(gl, RenderMode.Render);
             gl.PopMatrix();
 
@@ -211,7 +223,7 @@ namespace ShipSharpGL
 
         private void DockLight(OpenGL gl)
         {
-            float[] light1pos = new float[] { 0f, 200f, 0f, 1f };
+            float[] light1pos = new float[] { 0f, 300f, 0f, 1f };
             float[] light1ambient = new float[] { 0.1f * (Red / 255), 0.1f * (Green / 255), 0.1f * (Blue / 255), 1.0f };
             float[] light1diffuse = new float[] { 0.8f * (Red / 255), 0.8f * (Green / 255), 0.8f * (Blue / 255), 1.0f };
             float[] light1specular = new float[] { Red / 255, Green / 255, 1f * Blue / 255, 1.0f };
@@ -276,7 +288,7 @@ namespace ShipSharpGL
 
         public void SetupLighting(OpenGL gl)
         {
-            /*float[] global_ambient = new float[] { 0.1f, 0.1f, 0.1f, 1.0f };
+            /*float[] global_ambient = new float[] { 0.3f, 0.3f, 0.2f, 1.0f };
             gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);*/
             float[] light0pos = new float[] { LightX, LightY, LightZ, 1f };
             float[] light0ambient = new float[] { 0.8f, 0.8f, 0.6f, 1.0f };
@@ -295,7 +307,8 @@ namespace ShipSharpGL
             gl.Enable(OpenGL.GL_LIGHT0);
 
             gl.Enable(OpenGL.GL_COLOR_MATERIAL);
-            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            gl.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            gl.Enable(OpenGL.GL_NORMALIZE);
             gl.ShadeModel(OpenGL.GL_FLAT);
         }
 
@@ -303,6 +316,7 @@ namespace ShipSharpGL
         {
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             DrawText(gl);
+            
 
             gl.LoadIdentity();
 
@@ -340,7 +354,9 @@ namespace ShipSharpGL
             gl.PopMatrix();
             
             gl.PopMatrix();
-            
+
+            gl.LoadIdentity();
+
             gl.Flush();
         }
 

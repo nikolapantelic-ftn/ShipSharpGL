@@ -23,11 +23,16 @@ namespace ShipSharpGL
         private const int BORDER = 100;
         private Point oldPos;
 
+        public bool Enabled 
+        {
+            get => !(world.timer.IsEnabled || world.timer2.IsEnabled);
+        }
         public int Red { get; set; }
         public int Green { get; set; }
         public int Blue { get; set; }
 
         World world = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -87,6 +92,7 @@ namespace ShipSharpGL
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            if (!Enabled) return;
             switch (e.Key)
             {
                 case Key.W: world.UpdateCameraRotation(0, 0.09f); break;
@@ -96,11 +102,13 @@ namespace ShipSharpGL
                 case Key.Add: world.UpdateCameraPosition(0, 0, 10); break;
                 case Key.Subtract: world.UpdateCameraPosition(0, 0, -10); break;
                 case Key.C: world.ResetAnimation(); break;
+                case Key.Escape: Close(); break;
             }
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
+            if (!Enabled) return;
             bool outOfBoundsX = false;
             bool outOfBoundsY = false;
             Point point = e.GetPosition(this);
@@ -139,28 +147,33 @@ namespace ShipSharpGL
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (!Enabled) return;
             world.PostPercentage = (float)e.NewValue;
         }
 
         private void Slider_ValueChanged_1(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (!Enabled) return;
             world.RampPercentage = (float)e.NewValue;
         }
 
         private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!Enabled) return;
             float.TryParse(RedText.Text, out float red);
             world.Red = red;
         }
 
         private void TextBox_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!Enabled) return;
             float.TryParse(GreenText.Text, out float green);
             world.Green = green;
         }
 
         private void TextBox_TextChanged_2(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!Enabled) return;
             float.TryParse(BlueText.Text, out float blue);
             world.Blue = blue;
         }
